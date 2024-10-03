@@ -10,4 +10,10 @@ public interface UserRepository {
     List<User> findAllByIds(List<Long> userIds);
 
     User save(User user);
+
+    void saveAll(List<User> users);
+
+    void deleteById(Long userId);
+
+    void deleteByIds(List<Long> userIds);
 }

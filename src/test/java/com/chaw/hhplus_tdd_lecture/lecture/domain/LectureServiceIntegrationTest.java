@@ -108,7 +108,7 @@ public class LectureServiceIntegrationTest {
     }
 
     @Test
-    void testApplication_ValidationFailure() {
+    void testApplication_ValidationFailure_InvalidDate() {
         // Given
         Long userId = user1.getId();
         Long lectureId = lecture1.getId();
@@ -118,6 +118,33 @@ public class LectureServiceIntegrationTest {
                 .lectureId(lectureId)
                 .date(LocalDateTime.now())  // 오늘 날짜
                 .capacity(30)
+                .applicants(10)
+                .build();
+        lectureItemRepository.save(invalidLectureItem);
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> lectureService.application(userId, invalidLectureItem.getId()));
+
+        // 신청 내역 및 신청자 수가 변경되지 않았는지 확인
+        LectureItem unchangedLectureItem = lectureItemRepository.findById(invalidLectureItem.getId());
+        assertNotNull(unchangedLectureItem);
+        assertEquals(10, unchangedLectureItem.getApplicants());  // 신청자가 변경되지 않음
+
+        boolean applicationExists = applicationDetailRepository.existsByUserIdAndLectureItemId(userId, invalidLectureItem.getId());
+        assertFalse(applicationExists);  // 신청 내역이 저장되지 않았는지 확인
+    }
+
+    @Test
+    void testApplication_ValidationFailure_ExceedApplicants() {
+        // Given
+        Long userId = user1.getId();
+        Long lectureId = lecture1.getId();
+
+        // Validation 실패를 위해 정원이 꽉찬 강의를 생성
+        LectureItem invalidLectureItem = LectureItem.builder()
+                .lectureId(lectureId)
+                .date(LocalDateTime.now().plusDays(2))
+                .capacity(10)
                 .applicants(10)
                 .build();
         lectureItemRepository.save(invalidLectureItem);

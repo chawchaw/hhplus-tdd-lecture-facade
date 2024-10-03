@@ -34,4 +34,9 @@ public class LectureRepositoryImpl implements LectureRepository {
     public Lecture save(Lecture lecture) {
         return lectureJpaRepository.save(lecture);
     }
+
+    @Override
+    public void deleteById(Long lectureId) {
+        lectureJpaRepository.deleteById(lectureId);
+    }
 }

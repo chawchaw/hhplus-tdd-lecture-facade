@@ -90,4 +90,24 @@ class ApplicationValidatorUnitTest {
 
         assertEquals("내일 이후의 강의부터 가능합니다.", exception.getMessage());
     }
+
+    @Test
+    void testValidate_CapacityExceeded_ShouldThrowException() {
+        // Given
+        User student = User.builder()
+                .name("백")
+                .type(User.UserType.STUDENT)
+                .build();
+
+        LectureItem lectureItem = LectureItem.builder()
+                .capacity(10)  // 총 정원
+                .applicants(10)  // 현재 신청 인원 (정원과 동일)
+                .date(LocalDateTime.now().plusDays(2))  // 유효한 날짜 (내일 이후)
+                .build();
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> {
+            applicationValidator.validate(student, lectureItem);
+        }, "정원이 초과되었습니다.");
+    }
 }

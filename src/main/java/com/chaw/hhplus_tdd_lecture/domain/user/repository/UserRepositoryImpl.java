@@ -30,4 +30,19 @@ public class UserRepositoryImpl implements UserRepository {
     public User save(User user) {
         return userRepository.save(user);
     }
+
+    @Override
+    public void saveAll(List<User> users) {
+        userRepository.saveAll(users);
+    }
+
+    @Override
+    public void deleteById(Long userId) {
+        userRepository.deleteById(userId);
+    }
+
+    @Override
+    public void deleteByIds(List<Long> userIds) {
+        userRepository.deleteByIds(userIds);
+    }
 }

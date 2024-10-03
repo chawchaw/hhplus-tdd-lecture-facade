@@ -6,9 +6,13 @@ import java.util.List;
 
 public interface LectureItemRepository {
 
+    LectureItem findByIdWithLock(long lectureItemId);
+
     LectureItem findById(Long lectureItemId);
 
     List<LectureItem> getLectureItemsByIds(List<Long> lectureItemIds);
 
     LectureItem save(LectureItem lectureItem);
+
+    void deleteById(Long lectureItemId);
 }

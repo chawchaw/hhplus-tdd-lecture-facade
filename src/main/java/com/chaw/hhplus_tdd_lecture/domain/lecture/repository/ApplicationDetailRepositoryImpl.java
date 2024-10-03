@@ -35,4 +35,9 @@ public class ApplicationDetailRepositoryImpl implements ApplicationDetailReposit
     public boolean existsByUserIdAndLectureItemId(Long userId, Long lectureItemId) {
         return repository.existsByUserIdAndLectureItemId(userId, lectureItemId);
     }
+
+    @Override
+    public void deleteByLectureItemId(Long lectureItemId) {
+        repository.deleteByLectureItemId(lectureItemId);
+    }
 }

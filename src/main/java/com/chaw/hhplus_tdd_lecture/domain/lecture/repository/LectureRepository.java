@@ -13,4 +13,6 @@ public interface LectureRepository {
     List<Lecture> getLecturesByIds(List<Long> lectureIds);
 
     Lecture save(Lecture lecture);
+
+    void deleteById(Long lectureId);
 }
