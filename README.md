@@ -33,10 +33,10 @@
 
 ># 테이블 관계
 > 
-- **User** —— 1:N —— **Lecture** : 사용자는 여러 특강을 등록할 수 있다.
-- **Lecture** —— 1:N —— **LectureItem** : 특강에는 여러 강의가 포함될 수 있다.
-- **User** —— 1:N —— **ApplicationDetail** : 사용자는 여러 강의 신청 내역을 가질 수 있다.
-- **LectureItem** —— 1:N —— **ApplicationDetail** : 강의에는 여러 강의 신청 내역이 포함될 수 있다.
+- **User** —— 1:N —— **Lecture** : 사용자는 여러 특강을 가질 수 있다.
+- **Lecture** —— 1:N —— **LectureItem** : 특강은 여러 강의를 가질 수 있다.
+- **User** —— 1:N —— **ApplicationDetail** : 사용자는 여러 강의신청내역을 가질 수 있다.
+- **LectureItem** —— 1:N —— **ApplicationDetail** : 강의는 여러 강의신청내역을 가질 수 있다.
 
 ---
 
