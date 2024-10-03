@@ -13,9 +13,9 @@ public class Lecture {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    private Integer userId; // FK
+    private Long userId; // FK
 
     private String title;
 

@@ -14,11 +14,11 @@ public class ApplicationDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    private Integer userId; // FK
+    private Long userId; // FK
 
-    private Integer lectureItemId; // FK
+    private Long lectureItemId; // FK
 
     private LocalDateTime registrationDate;
 }

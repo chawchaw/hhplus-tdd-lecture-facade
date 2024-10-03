@@ -14,9 +14,9 @@ public class LectureItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    private Integer lectureId; // FK
+    private Long lectureId; // FK
 
     private LocalDate date;
 
