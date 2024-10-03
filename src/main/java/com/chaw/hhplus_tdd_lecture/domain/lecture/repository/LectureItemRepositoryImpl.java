@@ -16,6 +16,11 @@ public class LectureItemRepositoryImpl implements LectureItemRepository {
     }
 
     @Override
+    public LectureItem findByIdWithLock(long lectureItemId) {
+        return lectureItemJpaRepository.findByIdWithLock(lectureItemId);
+    }
+
+    @Override
     public LectureItem findById(Long lectureItemId) {
         return lectureItemJpaRepository.findById(lectureItemId).orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다."));
     }
@@ -28,6 +33,11 @@ public class LectureItemRepositoryImpl implements LectureItemRepository {
     @Override
     public LectureItem save(LectureItem lectureItem) {
         return lectureItemJpaRepository.save(lectureItem);
+    }
+
+    @Override
+    public void deleteById(Long lectureItemId) {
+        lectureItemJpaRepository.deleteById(lectureItemId);
     }
 
 }

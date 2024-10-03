@@ -86,7 +86,7 @@ class LectureServiceUnitTest {
 
         // Mock behavior
         when(userService.getUserById(userId)).thenReturn(user);
-        when(lectureItemRepository.findById(lectureItemId)).thenReturn(lectureItem);
+        when(lectureItemRepository.findByIdWithLock(lectureItemId)).thenReturn(lectureItem);
         when(applicationDetailRepository.save(userId, lectureItemId)).thenReturn(applicationDetail);
 
         // When
@@ -96,7 +96,7 @@ class LectureServiceUnitTest {
         assertEquals(userId, result.getUserId());
         assertEquals(lectureItemId, result.getLectureItemId());
         verify(userService, times(1)).getUserById(userId);
-        verify(lectureItemRepository, times(1)).findById(lectureItemId);
+        verify(lectureItemRepository, times(1)).findByIdWithLock(lectureItemId);
         verify(applicationValidator, times(1)).validate(user, lectureItem);
         verify(lectureItemRepository, times(1)).save(lectureItem);
         verify(applicationDetailRepository, times(1)).save(userId, lectureItemId);
@@ -123,7 +123,7 @@ class LectureServiceUnitTest {
 
         // Mock behavior
         when(userService.getUserById(userId)).thenReturn(user);
-        when(lectureItemRepository.findById(lectureItemId)).thenReturn(lectureItem);
+        when(lectureItemRepository.findByIdWithLock(lectureItemId)).thenReturn(lectureItem);
 
         // Validator throws exception
         doThrow(new IllegalArgumentException("Validation failed")).when(applicationValidator).validate(user, lectureItem);

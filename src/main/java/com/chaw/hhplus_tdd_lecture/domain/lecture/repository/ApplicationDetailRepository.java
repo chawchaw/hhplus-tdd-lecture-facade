@@ -11,4 +11,6 @@ public interface ApplicationDetailRepository {
     ApplicationDetail save(Long userId, Long lectureItemId);
 
     boolean existsByUserIdAndLectureItemId(Long userId, Long lectureItemId);
+
+    void deleteByLectureItemId(Long lectureItemId);
 }

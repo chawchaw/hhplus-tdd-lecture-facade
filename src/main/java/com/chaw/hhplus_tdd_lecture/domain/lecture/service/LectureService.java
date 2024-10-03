@@ -44,7 +44,7 @@ public class LectureService {
     @Transactional
     public ApplicationDetail application(Long userId, Long lectureItemId) {
         User user = userService.getUserById(userId);
-        LectureItem lectureItem = lectureItemRepository.findById(lectureItemId);
+        LectureItem lectureItem = lectureItemRepository.findByIdWithLock(lectureItemId);
         applicationValidator.validate(user, lectureItem);
         lectureItem.setApplicants(lectureItem.getApplicants() + 1);
         lectureItemRepository.save(lectureItem);

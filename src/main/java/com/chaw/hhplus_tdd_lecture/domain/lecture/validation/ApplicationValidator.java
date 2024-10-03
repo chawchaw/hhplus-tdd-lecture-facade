@@ -18,5 +18,9 @@ public class ApplicationValidator {
         if (LocalDateTime.now().truncatedTo(ChronoUnit.DAYS).plusDays(1).isAfter(lectureItem.getDate())) {
             throw new IllegalArgumentException("내일 이후의 강의부터 가능합니다.");
         }
+
+        if (lectureItem.getCapacity() <= lectureItem.getApplicants()) {
+            throw new IllegalArgumentException("정원이 초과되었습니다.");
+        }
     }
 }
