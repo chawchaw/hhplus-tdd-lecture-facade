@@ -14,6 +14,8 @@ public interface ApplicationDetailJpaRepository extends JpaRepository<Applicatio
 
     List<ApplicationDetail> findByUserId(Long userId);
 
+    List<ApplicationDetail> findByUserIdAndLectureItemId(Long userId, Long lectureItemId);
+
     boolean existsByUserIdAndLectureItemId(Long userId, Long lectureItemId);
 
     @Modifying

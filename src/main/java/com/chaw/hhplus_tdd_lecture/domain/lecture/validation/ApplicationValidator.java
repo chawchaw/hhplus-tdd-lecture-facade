@@ -10,7 +10,7 @@ import java.time.temporal.ChronoUnit;
 @Component
 public class ApplicationValidator {
 
-    public void validate(User user, LectureItem lectureItem) {
+    public void validate(User user, LectureItem lectureItem, Boolean hasApplied) {
         if (user.getType() != User.UserType.STUDENT) {
             throw new IllegalArgumentException("학생만 신청 가능합니다.");
         }
@@ -21,6 +21,10 @@ public class ApplicationValidator {
 
         if (lectureItem.getCapacity() <= lectureItem.getApplicants()) {
             throw new IllegalArgumentException("정원이 초과되었습니다.");
+        }
+
+        if (hasApplied) {
+            throw new IllegalStateException("이미 신청한 강의입니다.");
         }
     }
 }

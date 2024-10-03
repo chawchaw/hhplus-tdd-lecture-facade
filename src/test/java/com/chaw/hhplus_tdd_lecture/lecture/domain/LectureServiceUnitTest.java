@@ -15,10 +15,12 @@ import com.chaw.hhplus_tdd_lecture.domain.lecture.validation.ApplicationValidato
 import com.chaw.hhplus_tdd_lecture.domain.user.entity.User;
 import com.chaw.hhplus_tdd_lecture.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -87,6 +89,7 @@ class LectureServiceUnitTest {
         // Mock behavior
         when(userService.getUserById(userId)).thenReturn(user);
         when(lectureItemRepository.findByIdWithLock(lectureItemId)).thenReturn(lectureItem);
+        when(applicationDetailRepository.existsByUserIdAndLectureItemId(userId, lectureItemId)).thenReturn(false);
         when(applicationDetailRepository.save(userId, lectureItemId)).thenReturn(applicationDetail);
 
         // When
@@ -97,7 +100,7 @@ class LectureServiceUnitTest {
         assertEquals(lectureItemId, result.getLectureItemId());
         verify(userService, times(1)).getUserById(userId);
         verify(lectureItemRepository, times(1)).findByIdWithLock(lectureItemId);
-        verify(applicationValidator, times(1)).validate(user, lectureItem);
+        verify(applicationValidator, times(1)).validate(user, lectureItem, false);
         verify(lectureItemRepository, times(1)).save(lectureItem);
         verify(applicationDetailRepository, times(1)).save(userId, lectureItemId);
     }
@@ -126,7 +129,7 @@ class LectureServiceUnitTest {
         when(lectureItemRepository.findByIdWithLock(lectureItemId)).thenReturn(lectureItem);
 
         // Validator throws exception
-        doThrow(new IllegalArgumentException("Validation failed")).when(applicationValidator).validate(user, lectureItem);
+        doThrow(new IllegalArgumentException("Validation failed")).when(applicationValidator).validate(user, lectureItem, false);
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> lectureService.application(userId, lectureItemId));
@@ -134,6 +137,27 @@ class LectureServiceUnitTest {
         // Verify that other operations were not performed
         verify(lectureItemRepository, never()).save(lectureItem);
         verify(applicationDetailRepository, never()).save(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("이미 신청한 경우 데이터 무결성 예외가 발생할 때 적절한 메시지를 던진다.")
+    void testApplication_DataIntegrityViolationException() {
+        Long userId = 1L;
+        Long lectureItemId = 1L;
+
+        User user = User.builder().id(userId).name("John").build();
+        LectureItem lectureItem = LectureItem.builder().id(lectureItemId).applicants(10).capacity(20).build();
+
+        when(userService.getUserById(userId)).thenReturn(user);
+        when(lectureItemRepository.findByIdWithLock(lectureItemId)).thenReturn(lectureItem);
+        when(applicationDetailRepository.existsByUserIdAndLectureItemId(userId, lectureItemId)).thenReturn(false);
+        when(applicationDetailRepository.save(userId, lectureItemId)).thenThrow(new DataIntegrityViolationException("이미 신청한 강의입니다."));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            lectureService.application(userId, lectureItemId);
+        });
+
+        assertEquals("이미 신청한 강의입니다.", exception.getMessage());
     }
 
     @Test

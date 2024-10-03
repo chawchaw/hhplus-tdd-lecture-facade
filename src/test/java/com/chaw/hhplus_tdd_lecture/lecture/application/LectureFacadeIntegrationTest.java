@@ -73,8 +73,6 @@ class LectureFacadeIntegrationTest {
                 .applicants(10)
                 .build();
         lectureItemRepository.save(lectureItem);
-
-        applicationDetail1 = applicationDetailRepository.save(user.getId(), lectureItem.getId());
     }
 
     @Test
@@ -156,6 +154,7 @@ class LectureFacadeIntegrationTest {
     void testGetApplicationDetailsByUserId_Success() {
         // Given
         Long userId = user.getId();
+        applicationDetail1 = applicationDetailRepository.save(user.getId(), lectureItem.getId());
 
         // When
         List<ApplicationDetailDTO> applicationDetailDTOs = lectureFacade.getApplicationDetailsByUserId(userId);

@@ -40,7 +40,7 @@ class ApplicationValidatorUnitTest {
                 .build();
 
         // When & Then
-        assertDoesNotThrow(() -> applicationValidator.validate(user, lectureItem));
+        assertDoesNotThrow(() -> applicationValidator.validate(user, lectureItem, false));
     }
 
     @Test
@@ -62,7 +62,7 @@ class ApplicationValidatorUnitTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> applicationValidator.validate(user, lectureItem));
+                () -> applicationValidator.validate(user, lectureItem, false));
 
         assertEquals("학생만 신청 가능합니다.", exception.getMessage());
     }
@@ -86,7 +86,7 @@ class ApplicationValidatorUnitTest {
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> applicationValidator.validate(user, lectureItem));
+                () -> applicationValidator.validate(user, lectureItem, false));
 
         assertEquals("내일 이후의 강의부터 가능합니다.", exception.getMessage());
     }
@@ -107,7 +107,27 @@ class ApplicationValidatorUnitTest {
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
-            applicationValidator.validate(student, lectureItem);
+            applicationValidator.validate(student, lectureItem, false);
         }, "정원이 초과되었습니다.");
+    }
+
+    @Test
+    void testValidate_HasApplied_ShouldThrowException() {
+        // Given
+        User student = User.builder()
+                .name("백")
+                .type(User.UserType.STUDENT)
+                .build();
+
+        LectureItem lectureItem = LectureItem.builder()
+                .capacity(30)
+                .applicants(10)
+                .date(LocalDateTime.now().plusDays(2))  // 유효한 날짜 (내일 이후)
+                .build();
+
+        // When & Then
+        assertThrows(IllegalStateException.class, () -> {
+            applicationValidator.validate(student, lectureItem, true);
+        }, "이미 신청한 강의입니다.");
     }
 }
