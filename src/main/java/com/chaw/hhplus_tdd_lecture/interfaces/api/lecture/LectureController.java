@@ -2,6 +2,7 @@ package com.chaw.hhplus_tdd_lecture.interfaces.api.lecture;
 
 import com.chaw.hhplus_tdd_lecture.application.lecture.LectureFacade;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.LectureItemDTO;
+import com.chaw.hhplus_tdd_lecture.interfaces.api.lecture.dto.ApplicationRequestDTO;
 import com.chaw.hhplus_tdd_lecture.interfaces.api.lecture.dto.LectureDateRangeRequestDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,13 @@ public class LectureController {
 
     public LectureController(LectureFacade lectureFacade) {
         this.lectureFacade = lectureFacade;
+    }
+
+    @PostMapping("/application")
+    public ResponseEntity<Boolean> application(
+            @RequestBody ApplicationRequestDTO requestDTO) {
+        lectureFacade.application(requestDTO.getUserId(), requestDTO.getLectureItemId());
+        return ResponseEntity.ok(true);
     }
 
     @PostMapping("/applicable")

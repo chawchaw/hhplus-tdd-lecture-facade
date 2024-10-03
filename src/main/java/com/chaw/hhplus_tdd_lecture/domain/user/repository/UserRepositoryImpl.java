@@ -2,6 +2,7 @@ package com.chaw.hhplus_tdd_lecture.domain.user.repository;
 
 import com.chaw.hhplus_tdd_lecture.domain.user.entity.User;
 import com.chaw.hhplus_tdd_lecture.infrastructure.user.UserJpaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,6 +14,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     public UserRepositoryImpl(UserJpaRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    @Override
+    public User findById(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
     }
 
     @Override

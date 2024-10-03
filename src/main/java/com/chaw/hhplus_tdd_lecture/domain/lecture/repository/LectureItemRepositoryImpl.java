@@ -2,6 +2,7 @@ package com.chaw.hhplus_tdd_lecture.domain.lecture.repository;
 
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.LectureItem;
 import com.chaw.hhplus_tdd_lecture.infrastructure.lecture.LectureItemJpaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -13,7 +14,13 @@ public class LectureItemRepositoryImpl implements LectureItemRepository {
     }
 
     @Override
+    public LectureItem findById(Long lectureItemId) {
+        return lectureItemJpaRepository.findById(lectureItemId).orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다."));
+    }
+
+    @Override
     public LectureItem save(LectureItem lectureItem) {
         return lectureItemJpaRepository.save(lectureItem);
     }
+
 }

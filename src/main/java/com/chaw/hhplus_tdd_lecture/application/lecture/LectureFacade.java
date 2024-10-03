@@ -15,6 +15,11 @@ public class LectureFacade {
         this.lectureService = lectureService;
     }
 
+    public Boolean application(Long userId, Long lectureItemId) {
+        lectureService.application(userId, lectureItemId);
+        return true;
+    }
+
     public List<LectureItemDTO> getApplicableLecturesByDate(LocalDateTime dateStart, LocalDateTime dateEnd) {
         return lectureService.getApplicableLecturesByDate(dateStart, dateEnd);
     }

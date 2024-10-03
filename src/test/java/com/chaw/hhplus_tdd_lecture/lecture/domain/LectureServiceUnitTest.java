@@ -1,11 +1,15 @@
 package com.chaw.hhplus_tdd_lecture.lecture.domain;
 
 import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.LectureItemDTO;
+import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.ApplicationDetail;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.Lecture;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.LectureItem;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.mapper.LectureMapper;
+import com.chaw.hhplus_tdd_lecture.domain.lecture.repository.ApplicationDetailRepository;
+import com.chaw.hhplus_tdd_lecture.domain.lecture.repository.LectureItemRepository;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.repository.LectureRepository;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.service.LectureService;
+import com.chaw.hhplus_tdd_lecture.domain.lecture.validation.ApplicationValidator;
 import com.chaw.hhplus_tdd_lecture.domain.user.entity.User;
 import com.chaw.hhplus_tdd_lecture.domain.user.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +32,15 @@ class LectureServiceUnitTest {
     private UserService userService;
 
     @Mock
+    private LectureItemRepository lectureItemRepository;
+
+    @Mock
+    private ApplicationDetailRepository applicationDetailRepository;
+
+    @Mock
+    private ApplicationValidator applicationValidator;
+
+    @Mock
     private LectureRepository lectureRepository;
 
     @Mock
@@ -39,6 +52,83 @@ class LectureServiceUnitTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);  // Mockito 초기화
+    }
+
+    @Test
+    void testApplication_Success() {
+        // Given
+        Long userId = 1L;
+        Long lectureItemId = 10L;
+
+        User user = User.builder()
+                .id(userId)
+                .name("백")
+                .type(User.UserType.STUDENT)
+                .build();
+
+        LectureItem lectureItem = LectureItem.builder()
+                .id(lectureItemId)
+                .lectureId(101L)
+                .capacity(30)
+                .applicants(10)
+                .build();
+
+        ApplicationDetail applicationDetail = ApplicationDetail.builder()
+                .userId(userId)
+                .lectureItemId(lectureItemId)
+                .registrationDate(LocalDateTime.now())
+                .build();
+
+        // Mock behavior
+        when(userService.getUserById(userId)).thenReturn(user);
+        when(lectureItemRepository.findById(lectureItemId)).thenReturn(lectureItem);
+        when(applicationDetailRepository.save(userId, lectureItemId)).thenReturn(applicationDetail);
+
+        // When
+        ApplicationDetail result = lectureService.application(userId, lectureItemId);
+
+        // Then
+        assertEquals(userId, result.getUserId());
+        assertEquals(lectureItemId, result.getLectureItemId());
+        verify(userService, times(1)).getUserById(userId);
+        verify(lectureItemRepository, times(1)).findById(lectureItemId);
+        verify(applicationValidator, times(1)).validate(user, lectureItem);
+        verify(lectureItemRepository, times(1)).save(lectureItem);
+        verify(applicationDetailRepository, times(1)).save(userId, lectureItemId);
+    }
+
+    @Test
+    void testApplication_ValidationFailure() {
+        // Given
+        Long userId = 1L;
+        Long lectureItemId = 10L;
+
+        User user = User.builder()
+                .id(userId)
+                .name("백")
+                .type(User.UserType.STUDENT)
+                .build();
+
+        LectureItem lectureItem = LectureItem.builder()
+                .id(lectureItemId)
+                .lectureId(101L)
+                .capacity(30)
+                .applicants(10)
+                .build();
+
+        // Mock behavior
+        when(userService.getUserById(userId)).thenReturn(user);
+        when(lectureItemRepository.findById(lectureItemId)).thenReturn(lectureItem);
+
+        // Validator throws exception
+        doThrow(new IllegalArgumentException("Validation failed")).when(applicationValidator).validate(user, lectureItem);
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> lectureService.application(userId, lectureItemId));
+
+        // Verify that other operations were not performed
+        verify(lectureItemRepository, never()).save(lectureItem);
+        verify(applicationDetailRepository, never()).save(anyLong(), anyLong());
     }
 
     @Test

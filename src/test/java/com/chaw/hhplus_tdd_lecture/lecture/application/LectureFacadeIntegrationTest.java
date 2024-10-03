@@ -48,6 +48,7 @@ class LectureFacadeIntegrationTest {
         // 테스트를 위한 데이터 추가
         user = User.builder()
                 .name("백")
+                .type(User.UserType.STUDENT)
                 .build();
         userRepository.save(user);
 
@@ -60,7 +61,7 @@ class LectureFacadeIntegrationTest {
 
         lectureItem = LectureItem.builder()
                 .lectureId(lecture.getId())
-                .date(LocalDateTime.of(2023, 10, 10, 10, 0))
+                .date(LocalDateTime.of(2024, 10, 10, 10, 0))
                 .capacity(30)
                 .applicants(10)
                 .build();
@@ -68,10 +69,51 @@ class LectureFacadeIntegrationTest {
     }
 
     @Test
+    void testApplication_Success() {
+        // Given
+        Long userId = user.getId();
+        Long lectureItemId = lectureItem.getId();
+
+        // When
+        Boolean result = lectureFacade.application(userId, lectureItemId);
+
+        // Then
+        assertTrue(result);
+
+        // LectureItem의 신청자 수가 증가했는지 확인
+        LectureItem updatedLectureItem = lectureItemRepository.findById(lectureItemId);
+        assertNotNull(updatedLectureItem);
+        assertEquals(11, updatedLectureItem.getApplicants());  // 신청자가 증가했는지 확인
+    }
+
+    @Test
+    void testApplication_ValidationFailure() {
+        // Given
+        Long userId = user.getId();
+
+        // 오늘 날짜의 강의로 설정하여 validation을 실패시키기 위해 강의 데이터 생성
+        LectureItem invalidLectureItem = LectureItem.builder()
+                .lectureId(102L)
+                .date(LocalDateTime.now())  // 오늘 날짜
+                .capacity(30)
+                .applicants(10)
+                .build();
+        lectureItemRepository.save(invalidLectureItem);
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> lectureFacade.application(userId, invalidLectureItem.getId()));
+
+        // 신청자 수가 변경되지 않았는지 확인
+        LectureItem unchangedLectureItem = lectureItemRepository.findById(invalidLectureItem.getId());
+        assertNotNull(unchangedLectureItem);
+        assertEquals(10, unchangedLectureItem.getApplicants());  // 신청자가 증가하지 않았는지 확인
+    }
+
+    @Test
     void testGetApplicableLecturesByDate() {
         // Given
-        LocalDateTime dateStart = LocalDateTime.of(2023, 10, 1, 0, 0);
-        LocalDateTime dateEnd = LocalDateTime.of(2023, 10, 31, 23, 59);
+        LocalDateTime dateStart = LocalDateTime.of(2024, 10, 1, 0, 0);
+        LocalDateTime dateEnd = LocalDateTime.of(2024, 10, 31, 23, 59);
 
         // When
         List<LectureItemDTO> result = lectureFacade.getApplicableLecturesByDate(dateStart, dateEnd);
@@ -90,8 +132,8 @@ class LectureFacadeIntegrationTest {
     @Test
     void testGetApplicableLecturesByDate_NoData() {
         // Given
-        LocalDateTime dateStart = LocalDateTime.of(2024, 1, 1, 0, 0);
-        LocalDateTime dateEnd = LocalDateTime.of(2024, 12, 31, 23, 59);
+        LocalDateTime dateStart = LocalDateTime.of(2025, 1, 1, 0, 0);
+        LocalDateTime dateEnd = LocalDateTime.of(2025, 12, 31, 23, 59);
 
         // When
         List<LectureItemDTO> result = lectureFacade.getApplicableLecturesByDate(dateStart, dateEnd);

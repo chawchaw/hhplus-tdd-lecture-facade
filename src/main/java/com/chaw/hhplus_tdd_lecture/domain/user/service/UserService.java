@@ -14,6 +14,10 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId);
+    }
+
     public List<User> getUsersByIds(List<Long> userIds) {
         return userRepository.findAllByIds(userIds);
     }

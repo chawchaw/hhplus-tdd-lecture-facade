@@ -2,8 +2,10 @@ package com.chaw.hhplus_tdd_lecture.lecture.domain;
 
 import com.chaw.hhplus_tdd_lecture.HhplusTddLectureApplication;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.LectureItemDTO;
+import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.ApplicationDetail;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.Lecture;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.LectureItem;
+import com.chaw.hhplus_tdd_lecture.domain.lecture.repository.ApplicationDetailRepository;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.repository.LectureItemRepository;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.repository.LectureRepository;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.service.LectureService;
@@ -39,6 +41,9 @@ public class LectureServiceIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ApplicationDetailRepository applicationDetailRepository;
+
     private User user1;
     private Lecture lecture1;
     private LectureItem lectureItem1;
@@ -48,6 +53,7 @@ public class LectureServiceIntegrationTest {
         // 데이터베이스에 필요한 테스트 데이터 삽입
         user1 = User.builder()
                 .name("백")
+                .type(User.UserType.STUDENT)
                 .build();
         userRepository.save(user1);
 
@@ -65,6 +71,63 @@ public class LectureServiceIntegrationTest {
                 .applicants(10)
                 .build();
         lectureItemRepository.save(lectureItem1);
+    }
+
+    @Test
+    void testApplication_Success() {
+        // Given
+        Long userId = user1.getId();
+        Long lectureId = lecture1.getId();
+
+        LectureItem lectureItem = LectureItem.builder()
+                .lectureId(lectureId)
+                .date(LocalDateTime.now().plusDays(1))  // 오늘 날짜
+                .capacity(30)
+                .applicants(10)
+                .build();
+        lectureItemRepository.save(lectureItem);
+
+        // When
+        ApplicationDetail result = lectureService.application(userId, lectureItem.getId());
+
+        // Then
+        assertNotNull(result);
+        assertEquals(userId, result.getUserId());
+        assertEquals(lectureItem.getId(), result.getLectureItemId());
+
+        LectureItem updatedLectureItem = lectureItemRepository.findById(lectureItem.getId());
+        assertNotNull(updatedLectureItem);
+        assertEquals(11, updatedLectureItem.getApplicants());  // 신청자가 증가했는지 확인
+
+        boolean applicationExists = applicationDetailRepository.existsByUserIdAndLectureItemId(userId, lectureItem.getId());
+        assertTrue(applicationExists);  // 신청 내역이 저장되었는지 확인
+    }
+
+    @Test
+    void testApplication_ValidationFailure() {
+        // Given
+        Long userId = user1.getId();
+        Long lectureId = lecture1.getId();
+
+        // Validation 실패를 위해 내일이 아닌 오늘 강의를 생성
+        LectureItem invalidLectureItem = LectureItem.builder()
+                .lectureId(lectureId)
+                .date(LocalDateTime.now())  // 오늘 날짜
+                .capacity(30)
+                .applicants(10)
+                .build();
+        lectureItemRepository.save(invalidLectureItem);
+
+        // When & Then
+        assertThrows(IllegalArgumentException.class, () -> lectureService.application(userId, invalidLectureItem.getId()));
+
+        // 신청 내역 및 신청자 수가 변경되지 않았는지 확인
+        LectureItem unchangedLectureItem = lectureItemRepository.findById(invalidLectureItem.getId());
+        assertNotNull(unchangedLectureItem);
+        assertEquals(10, unchangedLectureItem.getApplicants());  // 신청자가 변경되지 않음
+
+        boolean applicationExists = applicationDetailRepository.existsByUserIdAndLectureItemId(userId, invalidLectureItem.getId());
+        assertFalse(applicationExists);  // 신청 내역이 저장되지 않았는지 확인
     }
 
     @Test
