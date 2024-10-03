@@ -5,10 +5,10 @@ import lombok.*;
 
 @Entity
 @Table(name = "lecture")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Lecture {
 
     @Id

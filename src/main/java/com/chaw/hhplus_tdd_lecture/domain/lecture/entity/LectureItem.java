@@ -2,7 +2,7 @@ package com.chaw.hhplus_tdd_lecture.domain.lecture.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "lecture_item")
@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class LectureItem {
 
     @Id
@@ -18,7 +19,7 @@ public class LectureItem {
 
     private Long lectureId; // FK
 
-    private LocalDate date;
+    private LocalDateTime date;
 
     private Integer capacity;
 
