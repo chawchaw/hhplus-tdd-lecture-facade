@@ -1,5 +1,6 @@
 package com.chaw.hhplus_tdd_lecture.application.lecture;
 
+import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.ApplicationDetailDTO;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.LectureItemDTO;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.service.LectureService;
 import org.springframework.stereotype.Component;
@@ -22,5 +23,9 @@ public class LectureFacade {
 
     public List<LectureItemDTO> getApplicableLecturesByDate(LocalDateTime dateStart, LocalDateTime dateEnd) {
         return lectureService.getApplicableLecturesByDate(dateStart, dateEnd);
+    }
+
+    public List<ApplicationDetailDTO> getApplicationDetailsByUserId(Long userId) {
+        return lectureService.getApplicationDetailsByUserId(userId);
     }
 }

@@ -40,8 +40,8 @@ class LectureMapperUnitTest {
         Lecture lecture = Lecture.builder()
                 .id(101L)
                 .userId(201L)
-                .title("Lecture Title")
-                .description("Lecture Description")
+                .title("특강1")
+                .description("특강1 설명")
                 .build();
 
         User user = User.builder()
@@ -59,8 +59,8 @@ class LectureMapperUnitTest {
         assertNotNull(dto);
         assertEquals(1L, dto.getId());
         assertEquals(101L, dto.getLectureId());
-        assertEquals("Lecture Title", dto.getTitle());
-        assertEquals("Lecture Description", dto.getDescription());
+        assertEquals("특강1", dto.getTitle());
+        assertEquals("특강1 설명", dto.getDescription());
         assertEquals(201L, dto.getUserId());
         assertEquals("Back", dto.getInstructorName());
     }

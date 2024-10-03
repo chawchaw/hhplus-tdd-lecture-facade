@@ -5,6 +5,7 @@ import com.chaw.hhplus_tdd_lecture.infrastructure.lecture.ApplicationDetailJpaRe
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public class ApplicationDetailRepositoryImpl implements ApplicationDetailRepository {
@@ -13,6 +14,11 @@ public class ApplicationDetailRepositoryImpl implements ApplicationDetailReposit
 
     public ApplicationDetailRepositoryImpl(ApplicationDetailJpaRepository repository) {
         this.repository = repository;
+    }
+
+    @Override
+    public List<ApplicationDetail> getApplicationDetailsByUserId(Long userId) {
+        return repository.findByUserId(userId);
     }
 
     @Override

@@ -1,9 +1,11 @@
 package com.chaw.hhplus_tdd_lecture.domain.lecture.service;
 
+import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.ApplicationDetailDTO;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.LectureItemDTO;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.ApplicationDetail;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.Lecture;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.LectureItem;
+import com.chaw.hhplus_tdd_lecture.domain.lecture.mapper.ApplicationDetailMapper;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.mapper.LectureMapper;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.repository.ApplicationDetailRepository;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.repository.LectureItemRepository;
@@ -27,14 +29,16 @@ public class LectureService {
     private final ApplicationDetailRepository applicationDetailRepository;
     private final ApplicationValidator applicationValidator;
     private final LectureMapper lectureMapper;
+    private final ApplicationDetailMapper applicationDetailMapper;
 
-    public LectureService(UserService userService, LectureRepository lectureRepository, LectureItemRepository lectureItemRepository, ApplicationDetailRepository applicationDetailRepository, ApplicationValidator applicationValidator, LectureMapper lectureMapper) {
+    public LectureService(UserService userService, LectureRepository lectureRepository, LectureItemRepository lectureItemRepository, ApplicationDetailRepository applicationDetailRepository, ApplicationValidator applicationValidator, LectureMapper lectureMapper, ApplicationDetailMapper applicationDetailMapper) {
         this.userService = userService;
         this.lectureRepository = lectureRepository;
         this.lectureItemRepository = lectureItemRepository;
         this.applicationDetailRepository = applicationDetailRepository;
         this.applicationValidator = applicationValidator;
         this.lectureMapper = lectureMapper;
+        this.applicationDetailMapper = applicationDetailMapper;
     }
 
     @Transactional
@@ -57,6 +61,19 @@ public class LectureService {
 
         return lectureItems.stream()
                 .map(lectureItem -> lectureMapper.mapToDTO(lectureItem, users, lectures))
+                .collect(Collectors.toList());
+    }
+
+    public List<ApplicationDetailDTO> getApplicationDetailsByUserId(Long userId) {
+        List<ApplicationDetail> applicationDetails = applicationDetailRepository.getApplicationDetailsByUserId(userId);
+        List<Long> lectureItemIds = applicationDetails.stream().map(ApplicationDetail::getLectureItemId).collect(Collectors.toList());
+        List<LectureItem> lectureItems = lectureItemRepository.getLectureItemsByIds(lectureItemIds);
+        List<Long> lectureIds = lectureItems.stream().map(LectureItem::getLectureId).collect(Collectors.toList());
+        List<Lecture> lectures = lectureRepository.getLecturesByIds(lectureIds);
+        List<Long> userIds = lectures.stream().map(Lecture::getUserId).collect(Collectors.toList());
+        List<User> users = userService.getUsersByIds(userIds);
+        return applicationDetails.stream()
+                .map(applicationDetail -> applicationDetailMapper.mapToDTO(applicationDetail, lectureItems, users, lectures))
                 .collect(Collectors.toList());
     }
 

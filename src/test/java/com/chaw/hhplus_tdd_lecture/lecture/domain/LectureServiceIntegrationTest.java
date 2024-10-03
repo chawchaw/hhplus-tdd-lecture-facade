@@ -1,6 +1,7 @@
 package com.chaw.hhplus_tdd_lecture.lecture.domain;
 
 import com.chaw.hhplus_tdd_lecture.HhplusTddLectureApplication;
+import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.ApplicationDetailDTO;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.LectureItemDTO;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.ApplicationDetail;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.Lecture;
@@ -47,6 +48,7 @@ public class LectureServiceIntegrationTest {
     private User user1;
     private Lecture lecture1;
     private LectureItem lectureItem1;
+    private ApplicationDetail applicationDetail1;
 
     @BeforeEach
     void setUp() {
@@ -59,8 +61,8 @@ public class LectureServiceIntegrationTest {
 
         lecture1 = Lecture.builder()
                 .userId(user1.getId())
-                .title("Lecture Title 1")
-                .description("Lecture Description 1")
+                .title("특강1")
+                .description("특강1 설명")
                 .build();
         lectureRepository.save(lecture1);
 
@@ -71,6 +73,8 @@ public class LectureServiceIntegrationTest {
                 .applicants(10)
                 .build();
         lectureItemRepository.save(lectureItem1);
+
+        applicationDetail1 = applicationDetailRepository.save(user1.getId(), lectureItem1.getId());
     }
 
     @Test
@@ -144,8 +148,8 @@ public class LectureServiceIntegrationTest {
         assertFalse(result.isEmpty());
         assertEquals(lectureItem1.getId(), result.get(0).getId());
         assertEquals(lecture1.getId(), result.get(0).getLectureId());
-        assertEquals("Lecture Title 1", result.get(0).getTitle());
-        assertEquals("Lecture Description 1", result.get(0).getDescription());
+        assertEquals("특강1", result.get(0).getTitle());
+        assertEquals("특강1 설명", result.get(0).getDescription());
         assertEquals(user1.getId(), result.get(0).getUserId());
         assertEquals("백", result.get(0).getInstructorName());
     }
@@ -162,5 +166,39 @@ public class LectureServiceIntegrationTest {
         // Then
         assertNotNull(result);
         assertTrue(result.isEmpty());  // 해당 날짜에 데이터가 없는 경우
+    }
+
+    @Test
+    void testGetApplicationDetailsByUserId_Success() {
+        // Given
+        Long userId = user1.getId();
+
+        // When
+        List<ApplicationDetailDTO> applicationDetailDTOs = lectureService.getApplicationDetailsByUserId(userId);
+
+        // Then
+        assertNotNull(applicationDetailDTOs);
+        assertEquals(1, applicationDetailDTOs.size());  // 데이터가 하나만 있어야 함
+        assertEquals(user1.getId(), applicationDetailDTOs.get(0).getUserId());
+        assertNotNull(applicationDetailDTOs.get(0).getLectureItem());
+        assertEquals(lectureItem1.getId(), applicationDetailDTOs.get(0).getLectureItem().getId());
+        assertEquals("특강1", applicationDetailDTOs.get(0).getLectureItem().getTitle());
+        assertEquals("백", applicationDetailDTOs.get(0).getLectureItem().getInstructorName());
+    }
+
+    @Test
+    void testGetApplicationDetailsByUserId_NoApplications() {
+        // Given
+        User newUser = User.builder()
+                .name("백")
+                .build();
+        userRepository.save(newUser);
+
+        // When
+        List<ApplicationDetailDTO> applicationDetailDTOs = lectureService.getApplicationDetailsByUserId(newUser.getId());
+
+        // Then
+        assertNotNull(applicationDetailDTOs);
+        assertTrue(applicationDetailDTOs.isEmpty());  // 새로운 사용자이므로 신청 내역이 없어야 함
     }
 }

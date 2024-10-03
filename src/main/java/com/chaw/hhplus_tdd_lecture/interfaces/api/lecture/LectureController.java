@@ -1,7 +1,9 @@
 package com.chaw.hhplus_tdd_lecture.interfaces.api.lecture;
 
 import com.chaw.hhplus_tdd_lecture.application.lecture.LectureFacade;
+import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.ApplicationDetailDTO;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.dto.LectureItemDTO;
+import com.chaw.hhplus_tdd_lecture.interfaces.api.lecture.dto.ApplicationDetailsRequestDTO;
 import com.chaw.hhplus_tdd_lecture.interfaces.api.lecture.dto.ApplicationRequestDTO;
 import com.chaw.hhplus_tdd_lecture.interfaces.api.lecture.dto.LectureDateRangeRequestDTO;
 import jakarta.validation.Valid;
@@ -36,5 +38,12 @@ public class LectureController {
         List<LectureItemDTO> lectureItemDTOs = lectureFacade.getApplicableLecturesByDate(
                 dateRange.getDateStart(), dateRange.getDateEnd());
         return ResponseEntity.ok(lectureItemDTOs);
+    }
+
+    @PostMapping("/application-details")
+    public ResponseEntity<List<ApplicationDetailDTO>> getApplicationDetails(
+            @RequestBody ApplicationDetailsRequestDTO requestDTO) {
+        List<ApplicationDetailDTO> applicationDetailDTOs = lectureFacade.getApplicationDetailsByUserId(requestDTO.getUserId());
+        return ResponseEntity.ok(applicationDetailDTOs);
     }
 }

@@ -5,6 +5,8 @@ import com.chaw.hhplus_tdd_lecture.infrastructure.lecture.LectureItemJpaReposito
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class LectureItemRepositoryImpl implements LectureItemRepository {
     private final LectureItemJpaRepository lectureItemJpaRepository;
@@ -16,6 +18,11 @@ public class LectureItemRepositoryImpl implements LectureItemRepository {
     @Override
     public LectureItem findById(Long lectureItemId) {
         return lectureItemJpaRepository.findById(lectureItemId).orElseThrow(() -> new EntityNotFoundException("강의를 찾을 수 없습니다."));
+    }
+
+    @Override
+    public List<LectureItem> getLectureItemsByIds(List<Long> lectureItemIds) {
+        return lectureItemJpaRepository.findAllById(lectureItemIds);
     }
 
     @Override
