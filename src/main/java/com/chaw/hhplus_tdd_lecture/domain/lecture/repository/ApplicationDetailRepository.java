@@ -8,6 +8,8 @@ public interface ApplicationDetailRepository {
 
     List<ApplicationDetail> getApplicationDetailsByUserId(Long userId);
 
+    List<ApplicationDetail> getApplicationDetailsByUserIdAndLectureItemId(Long userId, Long lectureItemId);
+
     ApplicationDetail save(Long userId, Long lectureItemId);
 
     boolean existsByUserIdAndLectureItemId(Long userId, Long lectureItemId);

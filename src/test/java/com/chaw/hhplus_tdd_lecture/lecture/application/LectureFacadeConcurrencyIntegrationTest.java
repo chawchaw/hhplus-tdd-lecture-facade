@@ -2,7 +2,6 @@ package com.chaw.hhplus_tdd_lecture.lecture.application;
 
 import com.chaw.hhplus_tdd_lecture.HhplusTddLectureApplication;
 import com.chaw.hhplus_tdd_lecture.application.lecture.LectureFacade;
-import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.ApplicationDetail;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.Lecture;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.entity.LectureItem;
 import com.chaw.hhplus_tdd_lecture.domain.lecture.repository.ApplicationDetailRepository;
@@ -53,7 +52,6 @@ class LectureFacadeConcurrencyIntegrationTest {
     private User instructor;
     private Lecture lecture;
     private LectureItem lectureItem;
-    private List<ApplicationDetail> applicationDetails;
 
     @BeforeEach
     @Transactional
@@ -161,6 +159,44 @@ class LectureFacadeConcurrencyIntegrationTest {
         // 최종 신청자 수 확인
         LectureItem updatedLectureItem = lectureItemRepository.findById(lectureItem.getId());
         assertEquals(30, updatedLectureItem.getApplicants());  // 신청자는 30명이어야 함
+    }
+
+    @Test
+    @DisplayName("동일한 학생이 강의를 동시에 5번 신청하면 4번은 정원 초과로 실패해야 한다.")
+    void testApplication_Failure_DuplicatedApplication() throws InterruptedException, ExecutionException {
+        // 동일한 학생 ID 로 5개 가져오기
+        List<Long> studentIds = IntStream.range(0, 5)
+                .mapToObj(i -> students.get(0).getId())
+                .collect(Collectors.toList());
+
+        // 5개의 쓰레드로 동시에 신청 처리
+        List<CompletableFuture<Boolean>> futures = new ArrayList<>();
+        for (Long studentId : studentIds) {
+            CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return lectureFacade.application(studentId, lectureItem.getId());
+                } catch (Exception e) {
+                    return false;  // 실패한 경우 false 반환
+                }
+            });
+            futures.add(future);
+        }
+
+        // 모든 쓰레드 완료 후 결과 모음
+        List<Boolean> results = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream().map(CompletableFuture::join).collect(Collectors.toList()))
+                .get();
+
+        // 결과 검증
+        long successCount = results.stream().filter(result -> result).count();
+        long failureCount = results.stream().filter(result -> !result).count();
+
+        assertEquals(1, successCount);  // 성공한 건수
+        assertEquals(4, failureCount);  // 실패한 건수
+
+        // 최종 신청자 수 확인
+        LectureItem updatedLectureItem = lectureItemRepository.findById(lectureItem.getId());
+        assertEquals(1, updatedLectureItem.getApplicants());  // 신청자는 1명이어야 함
     }
 
     @AfterEach

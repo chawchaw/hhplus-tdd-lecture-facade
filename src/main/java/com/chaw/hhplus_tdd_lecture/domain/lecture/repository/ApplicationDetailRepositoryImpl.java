@@ -22,6 +22,11 @@ public class ApplicationDetailRepositoryImpl implements ApplicationDetailReposit
     }
 
     @Override
+    public List<ApplicationDetail> getApplicationDetailsByUserIdAndLectureItemId(Long userId, Long lectureItemId) {
+        return repository.findByUserIdAndLectureItemId(userId, lectureItemId);
+    }
+
+    @Override
     public ApplicationDetail save(Long userId, Long lectureItemId) {
         ApplicationDetail applicationDetail = ApplicationDetail.builder()
                 .userId(userId)

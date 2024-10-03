@@ -162,6 +162,33 @@ public class LectureServiceIntegrationTest {
     }
 
     @Test
+    void testApplication_Failure_DuplicateApplicationThrowsException() {
+        // Given
+        Long userId = user1.getId();
+        Long lectureId = lecture1.getId();
+
+        LectureItem validLectureItem = LectureItem.builder()
+                .lectureId(lectureId)
+                .date(LocalDateTime.now().plusDays(2))
+                .capacity(30)
+                .applicants(10)
+                .build();
+        lectureItemRepository.save(validLectureItem);
+        applicationDetailRepository.save(user1.getId(), validLectureItem.getId());
+
+        // When & Then
+        assertThrows(IllegalStateException.class, () -> lectureService.application(userId, validLectureItem.getId()));
+
+        // 신청 내역 및 신청자 수가 변경되지 않았는지 확인
+        LectureItem unchangedLectureItem = lectureItemRepository.findById(validLectureItem.getId());
+        assertNotNull(unchangedLectureItem);
+        assertEquals(10, unchangedLectureItem.getApplicants());  // 신청자가 변경되지 않음
+
+        List<ApplicationDetail> applicationDetails = applicationDetailRepository.getApplicationDetailsByUserIdAndLectureItemId(userId, validLectureItem.getId());
+        assertEquals(1, applicationDetails.size());  // 신청 내역이 저장되지 않았는지 확인
+    }
+
+    @Test
     void testGetApplicableLecturesByDate() {
         // Given
         LocalDateTime dateStart = LocalDateTime.of(2023, 10, 1, 0, 0);
